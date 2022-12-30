@@ -27,9 +27,15 @@ security:
 
     api:
       stateless: true
-      guard:
-        authenticators:
-          - lexik_jwt_authentication.jwt_token_authenticator
+      jwt: ~
+
+      # The config below is not to be used. Refer
+      # to https://github.com/lexik/LexikJWTAuthenticationBundle/pull/872
+      #      guard:
+      #        authenticators:
+      #          - lexik_jwt_authentication.jwt_token_authenticator
+
+
       #    main:
       #      lazy: true
       #      provider: app_user_provider

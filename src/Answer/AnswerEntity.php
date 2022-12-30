@@ -33,7 +33,7 @@ class AnswerEntity
 
     /**
      * @ORM\ManyToOne(targetEntity=CardEntity::class, inversedBy="answers")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      * @Ignore()
      */
     private $card;
