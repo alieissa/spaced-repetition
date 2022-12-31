@@ -1,22 +1,21 @@
 <?php
 
-namespace App\Tests\Card;
+namespace App\Card;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
 class CardTest extends WebTestCase
 {
-    public function testGetCards(): void
-    {
+    public function testGetCards()
+    : void {
         $client = static::createClient();
         $client->request('GET', '/card');
 
         $this->assertResponseIsSuccessful();
     }
 
-    public function testNewCard()
-    {
+    public function testNewCard() {
         $data = [
             'question' => 'test card',
             "answers"  => [["content" => "text"]],
@@ -38,8 +37,7 @@ class CardTest extends WebTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_CREATED);
     }
 
-    public function testShowCard()
-    {
+    public function testShowCard() {
         $client = static::createClient();
         /**
          * TODO Make sure we have a deck and a card with a set ids in test db. Needed for testing
@@ -52,8 +50,7 @@ class CardTest extends WebTestCase
         $this->assertResponseIsSuccessful();
     }
 
-    public function testCardQuestionUpdate()
-    {
+    public function testCardQuestionUpdate() {
         $data = ['question' => 'edited card question'];
 
         $client = static::createClient();
@@ -72,8 +69,7 @@ class CardTest extends WebTestCase
         $this->assertResponseIsSuccessful();
     }
 
-    public function testCardQualityUpdate()
-    {
+    public function testCardQualityUpdate() {
         $data = ['quality' => 2];
 
         $client = static::createClient();
@@ -92,8 +88,7 @@ class CardTest extends WebTestCase
         $this->assertResponseIsSuccessful();
     }
 
-    public function testDeleteCard()
-    {
+    public function testRemoveCard() {
         $client = static::createClient();
         $client->request(
             'DELETE',

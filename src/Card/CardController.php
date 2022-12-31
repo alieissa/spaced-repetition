@@ -31,8 +31,8 @@ class CardController extends AbstractController
     /**
      * @Route("/card", name="app_card_card", methods={"GET"})
      */
-    public function index(): Response
-    {
+    public function index()
+    : Response {
         $data = $this->cardRepository->findAll();
         return $this->json($data);
     }
@@ -40,8 +40,7 @@ class CardController extends AbstractController
     /**
      * @Route("/deck/{deck}/card", methods={"POST"})
      */
-    public function new(DeckEntity $deck, Request $request)
-    {
+    public function new(DeckEntity $deck, Request $request) {
         $data = $request->getContent();
         $card = $this->serlializer->deserialize(
             $data, CardEntity::class, 'json'
@@ -62,8 +61,7 @@ class CardController extends AbstractController
     /**
      * @Route("/deck/{deck}/card/{id}", methods={"DELETE"})
      */
-    public function remove(CardEntity $card)
-    {
+    public function remove(CardEntity $card) {
         /**
          * TODO is removeCard really necessary?
          */
@@ -75,16 +73,14 @@ class CardController extends AbstractController
     /**
      * @Route("/deck/{deck}/card/{id}", methods={"GET"})
      */
-    public function show(CardEntity $card)
-    {
+    public function show(CardEntity $card) {
         return $this->json($card);
     }
 
     /**
      * @Route("/deck/{deck}/card/{id}/question-update", methods={"PUT"})
      */
-    public function edit(CardEntity $card, Request $request)
-    {
+    public function questionUpdate(CardEntity $card, Request $request) {
         $data = $request->toArray();
 
         $card->setQuestion($data['question']);
@@ -99,8 +95,7 @@ class CardController extends AbstractController
     /**
      * @Route("/deck/{deck}/card/{id}/quality-update", methods={"PUT"})
      */
-    public function updateQuality(CardEntity $card, Request $request)
-    {
+    public function qualityUpdate(CardEntity $card, Request $request) {
         $data = $request->toArray();
         $quality = $data['quality'];
 
@@ -129,35 +124,32 @@ class CardController extends AbstractController
         return $this->json($card);
     }
 
-    private function getNextPracticeDate(int $interval)
-    {
+    private function getNextPracticeDate(int $interval) {
         $nextPracticeDate = (new DateTime("NOW"))->modify(
             sprintf("+%d day", $interval)
         );
         return $nextPracticeDate;
     }
 
-    private function getUpdatedRepetitions(int $repetitions, int $quality)
-    {
+    private function getUpdatedRepetitions(int $repetitions, int $quality) {
         return $quality < 3 ? 1 : ($repetitions + 1);
     }
 
-    private function getUpdatedEasiness(float $easiness, int $quality)
-    {
+    private function getUpdatedEasiness(float $easiness, int $quality) {
         return max(
             1.3, $easiness + 0.1 - (5.0 - $quality) * (0.08 + (5.0 - $quality)
-                * 0.02)
+                   * 0.02)
         );
     }
 
     private function getUpdatedInterval(int $interval, int $repetitions,
         float $easiness
     ) {
-        if ($repetitions <= 1) {
+        if($repetitions <= 1) {
             return 1;
         }
 
-        if ($repetitions == 2) {
+        if($repetitions == 2) {
             return 6;
         }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Deck;
+namespace App\Deck;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
