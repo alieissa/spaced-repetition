@@ -73,24 +73,21 @@ class CardController extends AbstractController
     }
 
     /**
-     * @Route("/deck/{deck}/card", methods={"GET"})
+     * @Route("/deck/{deck}/card/{id}", methods={"GET"})
      */
-    public function show(DeckEntity $deck)
+    public function show(CardEntity $card)
     {
-        return $this->json($deck->getCards());
+        return $this->json($card);
     }
 
     /**
-     * @Route("/deck/{deck}/card/{id}", methods={"PUT"})
+     * @Route("/deck/{deck}/card/{id}/question-update", methods={"PUT"})
      */
     public function edit(CardEntity $card, Request $request)
     {
-        $data = $request->getContent();
-        $payload = $this->serlializer->deserialize(
-            $data, CardEntity::class, 'json'
-        );
+        $data = $request->toArray();
 
-        $card->setQuestion($payload->getQuestion());
+        $card->setQuestion($data['question']);
         $card->setUpdatedAt(
             new DateTimeImmutable()
         ); // TODO Update card entity so that updatedAt is updated automatically
@@ -100,19 +97,28 @@ class CardController extends AbstractController
     }
 
     /**
-     * @Route("/deck/{deck}/card/{id}/update-quality", methods={"PUT"})
+     * @Route("/deck/{deck}/card/{id}/quality-update", methods={"PUT"})
      */
     public function updateQuality(CardEntity $card, Request $request)
     {
         $data = $request->toArray();
         $quality = $data['quality'];
 
+        /**
+         * TODO Move all update calculations in a util class. This will
+         * clean up this controller and allow one to add unit tests
+         */
         $easiness = $card->getEasiness();
         $updatedEasiness = $this->getUpdatedEasiness($easiness, $quality);
-        $updatedRepetitions = $this->getUpdatedRepetitions($quality, $card->getRepetitions());
-        $updatedIntervals = $this->getUpdatedInterval($card->getInterval(), $updatedRepetitions, $easiness);
+        $updatedRepetitions = $this->getUpdatedRepetitions(
+            $quality, $card->getRepetitions()
+        );
+        $updatedIntervals = $this->getUpdatedInterval(
+            $card->getInterval(), $updatedRepetitions, $easiness
+        );
         $nextPracticeDate = $this->getNextPracticeDate($updatedIntervals);
 
+        $card->setQuality($quality);
         $card->setEasiness($updatedEasiness);
         $card->setRepetitions($updatedRepetitions);
         $card->setInterval($updatedIntervals);
@@ -135,6 +141,7 @@ class CardController extends AbstractController
     {
         return $quality < 3 ? 1 : ($repetitions + 1);
     }
+
     private function getUpdatedEasiness(float $easiness, int $quality)
     {
         return max(
@@ -145,8 +152,7 @@ class CardController extends AbstractController
 
     private function getUpdatedInterval(int $interval, int $repetitions,
         float $easiness
-    )
-    {
+    ) {
         if ($repetitions <= 1) {
             return 1;
         }
