@@ -25,33 +25,22 @@ use Zenstruck\Foundry\RepositoryProxy;
  * @method static AnswerRepository|RepositoryProxy repository()
  * @method AnswerEntity|Proxy create(array|callable $attributes = [])
  */
-final class AnswerFactory extends ModelFactory
-{
-    public function __construct()
-    {
+final class AnswerFactory extends ModelFactory {
+    public function __construct() {
         parent::__construct();
-
-        // TODO inject services if required (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services)
     }
 
-    protected function getDefaults(): array
-    {
-        return [
-            // TODO add your default values here (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories)
-            'content' => self::faker()->text(),
-        ];
-    }
-
-    protected function initialize(): self
-    {
-        // see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
-        return $this
-            // ->afterInstantiate(function(AnswerEntity $answer): void {})
-        ;
-    }
-
-    protected static function getClass(): string
-    {
+    protected static function getClass(): string {
         return AnswerEntity::class;
+    }
+
+    protected function getDefaults(): array {
+        return ['content' => self::faker()->text(),];
+    }
+
+    protected function initialize(): self {
+        // see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
+        return $this// ->afterInstantiate(function(AnswerEntity $answer): void {})
+            ;
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Deck;
 
 use App\Card\CardEntity;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -10,9 +11,9 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=DeckRepository::class)
  * @ORM\Table(name="deck")
+ * @ORM\HasLifecycleCallbacks()
  */
-class DeckEntity
-{
+class DeckEntity {
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -37,46 +38,39 @@ class DeckEntity
     private $updatedAt;
 
     /**
-     * @ORM\OneToMany(targetEntity=CardEntity::class, mappedBy="deck")
+     * @ORM\OneToMany(targetEntity=CardEntity::class, mappedBy="deck", cascade={"persist"})
      */
     private $cards;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->cards = new ArrayCollection();
     }
 
-    public function getName(): ?string
-    {
+    public function getName(): ?string {
         return $this->name;
     }
 
-    public function setName(string $name): self
-    {
+    public function setName(string $name): self {
         $this->name = $name;
 
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
+    public function getCreatedAt(): ?DateTimeImmutable {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): self
-    {
+    public function setCreatedAt(DateTimeImmutable $createdAt): self {
         $this->createdAt = $createdAt;
 
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
+    public function getUpdatedAt(): ?DateTimeImmutable {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): self
-    {
+    public function setUpdatedAt(?DateTimeImmutable $updatedAt): self {
         $this->updatedAt = $updatedAt;
 
         return $this;
@@ -85,19 +79,16 @@ class DeckEntity
     /**
      * @return Collection<int, CardEntity>
      */
-    public function getCards(): Collection
-    {
+    public function getCards(): Collection {
         return $this->cards;
     }
 
-    public function getId(): ?int
-    {
+    public function getId(): ?int {
         return $this->id;
     }
 
-    public function addCard(CardEntity $card): self
-    {
-        if (!$this->cards->contains($card)) {
+    public function addCard(CardEntity $card): self {
+        if(!$this->cards->contains($card)) {
             $this->cards[] = $card;
             $card->setDeck($this);
         }
@@ -105,15 +96,28 @@ class DeckEntity
         return $this;
     }
 
-    public function removeCard(CardEntity $card): self
-    {
-        if ($this->cards->removeElement($card)) {
+    public function removeCard(CardEntity $card): self {
+        if($this->cards->removeElement($card)) {
             // set the owning side to null (unless already changed)
-            if ($card->getDeck() === $this) {
+            if($card->getDeck() === $this) {
                 $card->setDeck(null);
             }
         }
 
         return $this;
+    }
+
+    /**
+     * @ORM\PrePersist()
+     */
+    public function onPrePersist() {
+        $this->setCreatedAt(new DateTimeImmutable());
+    }
+
+    /**
+     * @ORM\PreUpdate
+     */
+    public function onPreUpdated() {
+        $this->setUpdatedAt(new DateTimeImmutable());
     }
 }

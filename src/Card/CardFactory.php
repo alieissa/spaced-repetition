@@ -2,6 +2,7 @@
 
 namespace App\Card;
 
+use DateTimeImmutable;
 use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\Proxy;
 use Zenstruck\Foundry\RepositoryProxy;
@@ -25,38 +26,32 @@ use Zenstruck\Foundry\RepositoryProxy;
  * @method static CardRepository|RepositoryProxy repository()
  * @method CardEntity|Proxy create(array|callable $attributes = [])
  */
-final class CardFactory extends ModelFactory
-{
-    public function __construct()
-    {
+final class CardFactory extends ModelFactory {
+    public function __construct() {
         parent::__construct();
-
-        // TODO inject services if required (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services)
     }
 
-    protected static function getClass(): string
-    {
+    protected static function getClass(): string {
         return CardEntity::class;
     }
 
-    protected function getDefaults(): array
-    {
+    protected function getDefaults(): array {
         return [
-            // TODO add your default values here (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories)
-            'question' => self::faker()->text(),
-            'easiness' => self::faker()->randomFloat(1, 1.3, 2.5),
-            'quality' => self::faker()->numberBetween(0, 5),
+            'question'           => self::faker()->text(),
+            'easiness'           => self::faker()->randomFloat(1, 1.3, 2.5),
+            'quality'            => self::faker()->numberBetween(0, 5),
             // TODO Use algorithm to calculate interval
-            'interval' => self::faker()->randomNumber(),
-            'repetitions' => self::faker()->randomNumber(),
+            'interval'           => self::faker()->randomNumber(),
+            'repetitions'        => self::faker()->randomNumber(),
             // TODO Use algorithm to calculate next_practice_date
             'next_practice_date' => self::faker()->dateTime(),
-            'createdAt' => \DateTimeImmutable::createFromMutable(self::faker()->dateTime()),
+            'createdAt'          => DateTimeImmutable::createFromMutable(
+                self::faker()->dateTime()
+            ),
         ];
     }
 
-    protected function initialize(): self
-    {
+    protected function initialize(): self {
         // see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
         return $this// ->afterInstantiate(function(Card $card): void {})
             ;

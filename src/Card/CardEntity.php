@@ -18,9 +18,9 @@ use Symfony\Component\Serializer\Annotation\SerializedPath;
 /**
  * @ORM\Entity(repositoryClass=CardRepository::class)
  * @ORM\Table(name="card")
+ * @ORM\HasLifecycleCallbacks
  */
-class CardEntity
-{
+class CardEntity {
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -71,8 +71,7 @@ class CardEntity
     private $deck;
 
     /**
-     * @ORM\OneToMany(targetEntity=AnswerEntity::class, mappedBy="card", cascade={"all"})
-     *
+     * @ORM\OneToMany(targetEntity=AnswerEntity::class, mappedBy="card", cascade={"persist"})
      */
     private $answers = [];
 
@@ -82,61 +81,51 @@ class CardEntity
      */
     private $question;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->answers = new ArrayCollection();
     }
 
-    public function getEasiness(): ?float
-    {
+    public function getEasiness(): ?float {
         return $this->easiness;
     }
 
-    public function setEasiness(float $easiness): self
-    {
+    public function setEasiness(float $easiness): self {
         $this->easiness = $easiness;
 
         return $this;
     }
 
-    public function getQuality(): ?int
-    {
+    public function getQuality(): ?int {
         return $this->quality;
     }
 
-    public function setQuality(int $quality): self
-    {
+    public function setQuality(int $quality): self {
         $this->quality = $quality;
 
         return $this;
     }
 
-    public function getInterval(): ?int
-    {
+    public function getInterval(): ?int {
         return $this->interval;
     }
 
-    public function setInterval(int $interval): self
-    {
+    public function setInterval(int $interval): self {
         $this->interval = $interval;
 
         return $this;
     }
 
-    public function getRepetitions(): ?int
-    {
+    public function getRepetitions(): ?int {
         return $this->repetitions;
     }
 
-    public function setRepetitions(int $repetitions): self
-    {
+    public function setRepetitions(int $repetitions): self {
         $this->repetitions = $repetitions;
 
         return $this;
     }
 
-    public function getNextPracticeDate(): ?DateTimeInterface
-    {
+    public function getNextPracticeDate(): ?DateTimeInterface {
         return $this->nextPracticeDate;
     }
 
@@ -147,41 +136,32 @@ class CardEntity
         return $this;
     }
 
-    public function getCreatedAt(): ?DateTimeImmutable
-    {
+    public function getCreatedAt(): ?DateTimeImmutable {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(DateTimeImmutable $createdAt): self
-    {
+    public function setCreatedAt(DateTimeImmutable $createdAt): self {
         $this->createdAt = $createdAt;
 
         return $this;
     }
 
-    public function getUpdatedAt(): ?DateTimeImmutable
-    {
+    public function getUpdatedAt(): ?DateTimeImmutable {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(?DateTimeImmutable $updatedAt): self
-    {
+    public function setUpdatedAt(?DateTimeImmutable $updatedAt): self {
         $this->updatedAt = $updatedAt;
 
         return $this;
     }
 
-    /**
-     * @return Collection<int, AnswerEntity >
-     */
-    public function getAnswers(): Collection
-    {
+    public function getAnswers(): Collection {
         return $this->answers;
     }
 
-    public function addAnswer(AnswerEntity $answer): self
-    {
-        if (!$this->answers->contains($answer)) {
+    public function addAnswer(AnswerEntity $answer): self {
+        if(!$this->answers->contains($answer)) {
             $this->answers[] = $answer;
             $answer->setCard($this);
         }
@@ -189,11 +169,10 @@ class CardEntity
         return $this;
     }
 
-    public function removeAnswer(AnswerEntity $answer): self
-    {
-        if ($this->answers->removeElement($answer)) {
+    public function removeAnswer(AnswerEntity $answer): self {
+        if($this->answers->removeElement($answer)) {
             // set the owning side to null (unless already changed)
-            if ($answer->getCard() === $this) {
+            if($answer->getCard() === $this) {
                 $answer->setCard(null);
             }
         }
@@ -201,13 +180,11 @@ class CardEntity
         return $this;
     }
 
-    public function getQuestion(): ?string
-    {
+    public function getQuestion(): ?string {
         return $this->question;
     }
 
-    public function setQuestion(string $question): self
-    {
+    public function setQuestion(string $question): self {
         $this->question = $question;
 
         return $this;
@@ -221,25 +198,35 @@ class CardEntity
      * @Groups({"deck:id"})
      * @SerializedName("deckId")
      */
-    public function getDeckId(): ?int
-    {
+    public function getDeckId(): ?int {
         return $this->getDeck()->getId();
     }
 
-    public function getId(): ?int
-    {
+    public function getId(): ?int {
         return $this->id;
     }
 
-    public function getDeck(): ?DeckEntity
-    {
+    public function getDeck(): ?DeckEntity {
         return $this->deck;
     }
 
-    public function setDeck(?DeckEntity $deck): self
-    {
+    public function setDeck(?DeckEntity $deck): self {
         $this->deck = $deck;
 
         return $this;
+    }
+
+    /**
+     * @ORM\PrePersist()
+     */
+    public function onPrePersist() {
+        $this->setCreatedAt(new DateTimeImmutable());
+    }
+
+    /**
+     * @ORM\PreUpdate
+     */
+    public function onPreUpdated() {
+        $this->setUpdatedAt(new DateTimeImmutable());
     }
 }

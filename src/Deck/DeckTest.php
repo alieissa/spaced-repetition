@@ -2,86 +2,90 @@
 
 namespace App\Deck;
 
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
-class DeckTest extends WebTestCase
-{
-    public function testGetDecks(): void
-    {
-        $client = static::createClient();
-        $client->request('GET', '/deck');
+class DeckTest extends WebTestCase {
+    private DeckEntity $deck;
+    private KernelBrowser $client;
+    private string $baseUrl = '/deck';
+
+    public function setUp(): void {
+        // DAMA bundle ensures that operations are not persisted to db.
+        // There is no for a tear down method to undo them.
+        $deckRepository = self::getContainer()->get('App\Deck\DeckRepository');
+        $deck = (new DeckEntity())->setName('test deck');
+        $deckRepository->add($deck, true);
+        $this->deck = $deck;
+
+        self::ensureKernelShutdown();
+        $this->client = static::createClient();
+    }
+
+
+    public function testGetDecks(): void {
+        $this->client->request('GET', $this->baseUrl);
 
         $this->assertResponseIsSuccessful();
     }
 
-    public function testNewDeck()
-    {
+    public function testNewDeck() {
         $data = ['name' => 'test deck'];
 
-        $client = static::createClient();
-
-        $client->request(
-            'POST',
-            '/deck',
-            [],
-            [],
-            ['CONTENT_TYPE' => 'application/json'],
-            json_encode($data)
+        $this->client->request(
+            'POST', $this->baseUrl, [], [],
+            ['CONTENT_TYPE' => 'application/json'], json_encode($data)
         );
 
-        $responseData = json_decode($client->getResponse()->getContent(), true);
+        $responseData = $this->getDecodedResponseContent();
         $this->assertEquals($data['name'], $responseData['name']);
         $this->assertResponseStatusCodeSame(Response::HTTP_CREATED);
     }
 
-    public function testShowDeck()
-    {
-        $client = static::createClient();
-        // TODO Make sure we have a deck with a set id in test db. Needed for testing
-        $client->request('GET', '/deck/11');
-        $responseData = json_decode($client->getResponse()->getContent(), true);
+    public function testShowDeck() {
+        $id = $this->deck->getId();
+        $this->client->request('GET', $this->getTestUrl());
+        $responseData = $this->getDecodedResponseContent();
 
-        $this->assertEquals(11, $responseData['id']);
+        $this->assertEquals($id, $responseData['id']);
         $this->assertResponseIsSuccessful();
     }
 
-    public function testDeckNotFound()
-    {
-        $client = static::createClient();
-        $client->request('GET', '/deck/1234');
+    public function testDeckNotFound() {
+        $this->client->request('GET', '/deck/-1234');
 
         $this->assertResponseStatusCodeSame(404);
     }
 
-    public function testEditDeck()
-    {
+    public function testEditDeck() {
         $data = ['name' => 'edited test deck'];
 
-        $client = static::createClient();
-
-        $client->request(
-            'PUT',
-            '/deck/11',
-            [],
-            [],
-            ['CONTENT_TYPE' => 'application/json'],
-            json_encode($data)
+        $this->client->request(
+            'PUT', $this->getTestUrl(), [], [],
+            ['CONTENT_TYPE' => 'application/json'], json_encode($data)
         );
 
-        $responseData = json_decode($client->getResponse()->getContent(), true);
+        $responseData = $this->getDecodedResponseContent();
         $this->assertEquals($data['name'], $responseData['name']);
         $this->assertResponseIsSuccessful();
     }
 
-    public function testDeleteDeck()
-    {
-        $client = static::createClient();
-        $client->request(
-            'DELETE',
-            '/deck/11',
+    public function testDeleteDeck() {
+        $this->client->request(
+            'DELETE', $this->getTestUrl(),
         );
 
         $this->assertResponseIsSuccessful();
+    }
+
+    private function getTestUrl() {
+        $id = $this->deck->getId();
+        return sprintf('%s/%d', $this->baseUrl, $id);
+    }
+
+    private function getDecodedResponseContent() {
+        $content = $this->client->getResponse()->getContent();
+        return json_decode($content, true);
     }
 }
